@@ -1,0 +1,248 @@
+<html>
+
+<head>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    @page {
+      size: A4;
+      margin: 0;
+    }
+
+    @media print {
+      #options {
+        display: none;
+      }
+
+      #print {
+        box-shadow: none !important;
+      }
+    }
+
+    #options>div {
+      display: inline-block;
+      vertical-align: top;
+      margin: 30px;
+    }
+
+    b {
+      font-weight: 600;
+    }
+
+    #print {
+      font-family: 'EB Garamond', serif;
+      font-size: 10pt;
+      line-height: 1.2em;
+      margin: auto;
+      box-shadow: 0 0 10px 5px grey;
+      width: 210mm;
+      height: 297mm;
+      text-align: justify;
+      padding: 15mm;
+      box-sizing: border-box;
+    }
+    #print > div {
+      margin-bottom: 10mm;
+    }
+
+    h1 {
+      margin: 0;
+      margin-bottom: 10mm;
+      font-size: 1.4em;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 1.2em;
+      text-decoration: underline;
+      font-weight: normal;
+      text-transform: uppercase;
+    }
+
+    h3 {
+      margin: 0;
+      margin-top: 5mm;
+    }
+
+    h4 {
+      text-align: right;
+    }
+
+    table {
+      width: 100%;
+      font-size: inherit;
+      text-align: center;
+    }
+
+    table td {
+      width: 25%;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <div id="options">
+      <div v-for="part in parts" :key="part.title">
+        <h3>{{ part.title }}</h3>
+        <div v-for="name,i of part.names" :key="i">
+          <select v-if="part.type == 'Dont'" v-model="part.names[i]">
+            <option v-for="name of parts.actuels.names" :key="name" :value="name">
+              {{ name }}
+            </option>
+          </select>
+          <input v-else type="text" v-model="part.names[i]" /><input type="button" value="-"
+            @click="part.names.splice(i,1)">
+        </div>
+        <div><input type="button" value="+" @click="part.names.push('')"></div>
+        <label v-if="part.address != undefined">Adresse <input type="text" v-model="part.address" /></label>
+      </div>
+      <div>
+        <h3>DATE BAIL</h3>
+        <input type="date" v-model="rawDateBail" />
+      </div>
+      <div>
+        <h3>DATE AVENANT</h3>
+        <input type="date" v-model="rawDateAvenant" />
+      </div>
+    </div>
+
+    <div id="print">
+      <h1>AVENANT AU CONTRAT DE BAIL DE RÉSIDENCE PRINCIPALE</h1>
+
+
+      <h2>OBJET : Colocation – changement de locataire</h2>
+
+
+      <div>
+        <p v-for="{ type, title, names, address } in parts" :key="title">
+          {{ type}}<br>
+          <template v-for="name of names">
+            <b>{{name}}</b>,
+          </template><br>
+          <span v-if="address">domiciliés au <b>{{address}}</b><br></span>
+          <span>ci-après dénommés les <b>{{title}}</b></span>
+        </p>
+      </div>
+
+
+      <div>
+        <h2>IL A ÉTÉ PRÉALABLEMENT EXPOSÉ CE QUI SUIT :</h2>
+        <ul>
+          <li>En date du <b>{{ dateBail }}</b> les <b>{{ parts.bailleurs.title }}</b> et les <b>{{
+              parts.actuels.title }}</b> ont signé un avenant au bail, ayant pris effet le <b>{{
+              dateBail }}</b> pour un bien en
+            location situé <b>{{ parts.actuels.address }}</b>.</li>
+          <li>Parmi les <b>{{ parts.actuels.title }}</b>, les <b>{{ parts.sortants.title }}</b> souhaitent quitter le
+            logement et ne plus être Partie au Contrat de Bail.</li>
+          <li>Les <b>{{ parts.entrants.title }}</b> souhaitent se substituer à ce dernier en tant que Partie au Contrat
+            de
+            Bail et reprendre les droits et obligations attachés.</li>
+          <li>Les autres <b>{{ parts.actuels.title }}</b> ne souhaitent pas mettre fin au Contrat de Bail.</li>
+        </ul>
+      </div>
+
+      <div>
+        <h2>CECI ÉTANT RAPPELÉ, LES PARTIES ONT CONVENU ET ARRÊTÉ CE QUI SUIT :</h2>
+        <ul>
+          <li>L’ensemble des Parties accepte, et le bailleur autorise, le remplacement des <b>{{ parts.sortants.title
+              }}</b>
+            par les <b>{{ parts.entrants.title }}</b>. Ces dernières ne seront donc plus Partie au Contrat de Bail et se
+            retrouvent dégagées de toute responsabilité au titre de celle-ci, à compter du <b>{{
+              dateAvenant }}</b>. La solidarité des
+            <b>{{ parts.sortants.title }}</b> et, le cas échéant, celle de la personne qui s’est portée caution pour
+            lui,
+            prennent fin à cette même date (art. 8.1 - VI de la loi du 6 juillet 1989).
+          </li>
+          <li>Les <b>{{ parts.sortants.title }}</b> sont remplacés par les <b>{{ parts.entrants.title }}</b>, qui
+            s’engagent
+            à respecter les obligations et clauses prévues dans le Contrat de Bail. La solidarité des <b>{{
+              parts.entrants.title }}</b> et, le cas échéant, celle des personnes qui se sont portées caution pour
+            elles,
+            commence à compter du <b>{{ dateAvenant }}</b>.</li>
+          <li>Les <b>{{ parts.actuels.title }}</b> qui ne font pas partie des <b>{{ parts.sortants.title }}</b>
+            deviendront
+            co-titulaires du Contrat de Bail avec les <b>{{ parts.entrants.title }}</b> et seront obligés conjointement
+            et
+            solidairement.</li>
+          <li>Le Contrat de Bail se poursuit et les <b>{{ parts.bailleurs.title }}</b> ne sont pas tenu de restituer tout ou partie du dépôt de
+            garantie,
+            les <b>{{ parts.sortants.title }}</b> et les <b>{{ parts.entrants.title }}</b> faisant leur affaire d’une
+            éventuelle compensation entre eux.</li>
+          <li>Les autres dispositions du Contrat de Bail restent inchangées.</li>
+          <li>Les parties s’engagent à ne pas contester la recevabilité et la validité ou la force probante du présent
+            avenant.</li>
+        </ul>
+      </div>
+
+
+      <h4>
+        Fait à Montpellier le
+        &nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+      </h4>
+
+      <p>
+        Signatures précédées de la mention "lu et approuvé"
+      </p>
+
+      <table>
+        <tr>
+          <td v-for="{title} in parts" :key="title">
+            {{title.slice(0,1)}}{{title.toLowerCase().slice(1)}}
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const { createApp } = Vue
+
+    createApp({
+      data() {
+        return {
+          parts: {
+            bailleurs: {
+              type: "Entre",
+              title: "BAILLEURS",
+              names: [""],
+              address: ""
+            },
+            actuels: {
+              type: "Et",
+              title: "LOCATAIRES ACTUELS",
+              names: [""],
+              address: ""
+            },
+            sortants: {
+              type: "Dont",
+              title: "LOCATAIRES SORTANTS",
+              names: [""]
+            },
+            entrants: {
+              type: "Et",
+              title: "LOCATAIRES ENTRANTS",
+              names: [""]
+            },
+          },
+          rawDateBail: '',
+          rawDateAvenant: ''
+        }
+      },
+      computed: {
+        dateBail() {
+          return new Date(this.rawDateBail).toLocaleDateString()
+        },
+        dateAvenant() {
+          return new Date(this.rawDateAvenant).toLocaleDateString()
+        }
+      }
+    }).mount('#app')
+  </script>
+</body>
+
+</html>
